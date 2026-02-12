@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生词本 - 古诗文学习</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #faf8f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c2c2c;
+            --text-secondary: #666666;
+            --accent: #8b5a2b;
+            --accent-light: #d4a574;
+            --border: #e8e4df;
+            --shadow: rgba(139, 90, 43, 0.08);
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .back-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent-light);
+        }
+
+        .page-title {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        /* 书籍选择器 */
+        .book-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .book-selector label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .book-selector select {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            min-width: 200px;
+            color: var(--text-primary);
+        }
+
+        .book-selector select:focus {
+            outline: none;
+            border-color: var(--accent-light);
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 16px var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 筛选 */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-light);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* 当前书籍标签 */
+        .current-book-tag {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .current-book-tag .clear-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .current-book-tag .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 内容列表 */
+        .notebook-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .notebook-item {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .notebook-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--shadow);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .item-word {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .item-sentence {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            line-height: 1.8;
+            max-width: 80%;
+        }
+
+        .item-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .item-type {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .item-type.word {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .item-type.sentence {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .item-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .item-book {
+            font-size: 0.8rem;
+            color: var(--accent-light);
+        }
+
+        .item-body {
+            padding: 20px;
+            background: var(--bg-primary);
+        }
+
+        .item-explanation {
+            white-space: pre-wrap;
+            line-height: 1.9;
+            font-size: 0.95rem;
+        }
+
+        .item-actions {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .action-btn.delete {
+            background: transparent;
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            position: relative;
+            z-index: 10;
+        }
+
+        .action-btn.delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .action-btn.delete:active {
+            transform: scale(0.95);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 1.1rem;
+        }
+
+        /* 折叠功能 */
+        .item-body.collapsed {
+            display: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .item-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .item-meta {
+                flex-direction: row;
+                align-items: center;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .item-sentence {
+                max-width: 100%;
+            }
+
+            .book-selector {
+                width: 100%;
+            }
+
+            .book-selector select {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="header-left">
+                <a href="/" class="back-btn">
+                    ← 返回阅读
+                </a>
+                <h1 class="page-title">📖 生词本</h1>
+            </div>
+            <div class="book-selector">
+                <label for="book-select">选择书籍：</label>
+                <select id="book-select" onchange="onBookChange()">
+                    <option value="">全部书籍</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 当前筛选的书籍 -->
+        <div id="current-book-tag" style="display: none;">
+            <div class="current-book-tag">
+                <span>📚</span>
+                <span id="current-book-name"></span>
+                <button class="clear-btn" onclick="clearBookFilter()">×</button>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="word-count">0</div>
+                <div class="stat-label">词语</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="sentence-count">0</div>
+                <div class="stat-label">句子</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="today-count">0</div>
+                <div class="stat-label">今日新增</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">总计</div>
+            </div>
+        </div>
+
+        <!-- 筛选 -->
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="word">词语</button>
+            <button class="filter-btn" data-filter="sentence">句子</button>
+        </div>
+
+        <!-- 列表 -->
+        <div class="notebook-list" id="notebook-list">
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">📝</div>
+                <div class="empty-text">还没有记录<br>去阅读时点击词语或选中句子吧</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let allItems = [];
+        let allBooks = [];
+        let currentFilter = 'all';
+        let currentBookId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBooks();
+            setupFilters();
+        });
+
+        async function loadBooks() {
+            try {
+                const response = await fetch('/api/books');
+                allBooks = await response.json();
+                renderBookSelector();
+                loadStats();
+                loadNotebook();
+            } catch (error) {
+                console.error('加载书籍失败:', error);
+            }
+        }
+
+        function renderBookSelector() {
+            const select = document.getElementById('book-select');
+            select.innerHTML = '<option value="">全部书籍</option>' +
+                allBooks.map(book => `<option value="${book.id}">${book.title}</option>`).join('');
+        }
+
+        function onBookChange() {
+            const select = document.getElementById('book-select');
+            const bookId = select.value;
+
+            if (bookId) {
+                currentBookId = parseInt(bookId);
+                const book = allBooks.find(b => b.id === currentBookId);
+                document.getElementById('current-book-name').textContent = book ? book.title : '';
+                document.getElementById('current-book-tag').style.display = 'block';
+            } else {
+                currentBookId = null;
+                document.getElementById('current-book-tag').style.display = 'none';
+            }
+
+            loadStats();
+            loadNotebook();
+        }
+
+        function clearBookFilter() {
+            currentBookId = null;
+            document.getElementById('book-select').value = '';
+            document.getElementById('current-book-tag').style.display = 'none';
+            loadStats();
+            loadNotebook();
+        }
+
+        async function loadStats() {
+            try {
+                let url = '/api/notebook/stats';
+                if (currentBookId) {
+                    url += `?book_id=${currentBookId}`;
+                }
+                const response = await fetch(url);
+                const stats = await response.json();
+
+                document.getElementById('word-count').textContent = stats.word_count;
+                document.getElementById('sentence-count').textContent = stats.sentence_count;
+                document.getElementById('today-count').textContent = stats.today_count;
+                document.getElementById('total-count').textContent = stats.total_count;
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+
+        async function loadNotebook() {
+            try {
+                let url = '/api/notebook';
+                if (currentBookId) {
+                    url += `?book_id=${currentBookId}`;
+                }
+                const response = await fetch(url);
+                allItems = await response.json();
+                renderItems();
+            } catch (error) {
+                console.error('加载生词本失败:', error);
+            }
+        }
+
+        function renderItems() {
+            const container = document.getElementById('notebook-list');
+            const emptyState = document.getElementById('empty-state');
+
+            let items = allItems;
+            if (currentFilter !== 'all') {
+                items = allItems.filter(item => item.type === currentFilter);
+            }
+
+            if (items.length === 0) {
+                emptyState.style.display = 'block';
+                container.innerHTML = '';
+                container.appendChild(emptyState);
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            container.innerHTML = items.map(item => `
+                <div class="notebook-item" data-id="${item.id}">
+                    <div class="item-header" onclick="toggleItem(this)">
+                        <div class="${item.type === 'word' ? 'item-word' : 'item-sentence'}">
+                            ${item.type === 'word' ? item.word : item.sentence}
+                        </div>
+                        <div class="item-meta">
+                            <span class="item-type ${item.type}">${item.type === 'word' ? '词语' : '句子'}</span>
+                            <span class="item-date">${formatDate(item.created_at)}</span>
+                            ${item.book_title ? `<span class="item-book">《${item.book_title}》</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="item-body collapsed">
+                        <div class="item-explanation">${item.explanation}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="action-btn delete" onclick="event.stopPropagation(); deleteItem(${item.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupFilters() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderItems();
+                });
+            });
+        }
+
+        function toggleItem(header) {
+            const body = header.nextElementSibling;
+            body.classList.toggle('collapsed');
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('确定要删除这条记录吗？')) return;
+
+            try {
+                const response = await fetch(`/api/notebook/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showToast(error.error || '删除失败');
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    allItems = allItems.filter(item => item.id !== id);
+                    renderItems();
+                    loadStats();
+                    showToast('删除成功');
+                } else {
+                    showToast(result.error || '删除失败');
+                }
+            } catch (error) {
+                console.error('删除错误:', error);
+                showToast('网络错误，删除失败');
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
+
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+
+</html>

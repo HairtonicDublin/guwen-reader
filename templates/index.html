@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古诗文学习</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #faf8f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c2c2c;
+            --text-secondary: #666666;
+            --accent: #8b5a2b;
+            --accent-light: #d4a574;
+            --border: #e8e4df;
+            --shadow: rgba(139, 90, 43, 0.08);
+            --highlight: #fff3cd;
+            --highlight-border: #ffc107;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.8;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .reader-panel {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .reader-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .reader-title {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .reader-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .reader-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .reader-content::-webkit-scrollbar-thumb {
+            background: var(--accent-light);
+            border-radius: 3px;
+        }
+
+        .reader-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-secondary);
+        }
+
+        .reader-placeholder h2 {
+            font-family: 'ZCOOL XiaoWei', serif;
+            font-size: 2rem;
+            margin-bottom: 16px;
+            color: var(--accent-light);
+        }
+
+        .text-content {
+            font-size: 1.2rem;
+            line-height: 2.2;
+            text-align: justify;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .text-content p {
+            margin-bottom: 1em;
+        }
+
+        .text-content::selection {
+            background: var(--accent-light);
+            color: white;
+        }
+
+        .text-content *::selection {
+            background: var(--accent-light);
+            color: white;
+        }
+
+        .char {
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 2px;
+        }
+
+        .char:hover {
+            background: rgba(139, 90, 43, 0.15);
+        }
+
+        .char.highlighted {
+            background: var(--highlight);
+            border-bottom: 2px solid var(--highlight-border);
+        }
+
+        .char.active {
+            background: var(--accent-light);
+            color: white;
+        }
+
+        .tool-panel {
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px var(--shadow);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .panel-body {
+            padding: 16px;
+        }
+
+        .book-list {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .book-item:hover {
+            background: var(--bg-primary);
+        }
+
+        .book-item.active {
+            background: rgba(139, 90, 43, 0.1);
+        }
+
+        .book-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .book-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .book-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .book-delete {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .book-item:hover .book-delete {
+            opacity: 1;
+        }
+
+        .book-delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-light);
+            background: rgba(139, 90, 43, 0.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(139, 90, 43, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .upload-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .notebook-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .notebook-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 90, 43, 0.25);
+        }
+
+        .ai-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 250px;
+        }
+
+        .ai-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .ai-waiting {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .ai-waiting .emoji {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+        }
+
+        .ai-loading .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .explanation-result {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .explanation-word {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .explanation-text {
+            white-space: pre-wrap;
+            font-size: 0.88rem;
+            line-height: 1.9;
+        }
+
+        .selection-popup {
+            position: fixed;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            display: none;
+            z-index: 1000;
+            border: 1px solid var(--border);
+        }
+
+        .selection-popup button {
+            padding: 10px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .selection-popup button:hover {
+            background: var(--accent-light);
+        }
+
+        .empty-text {
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .tip-bar {
+            padding: 10px 20px;
+            background: rgba(139, 90, 43, 0.08);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--accent);
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .tool-panel {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .panel-card {
+                flex: 1;
+                min-width: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="reader-panel">
+            <div class="reader-header">
+                <h1 class="reader-title" id="current-book-title">古诗文学习</h1>
+            </div>
+            <div class="tip-bar" id="tip-bar">💡 单击字查词 | 拖动选择多字后点击弹出按钮解释 | 再次点击黄色高亮字可取消</div>
+            <div class="reader-content" id="reader-content">
+                <div class="reader-placeholder" id="reader-placeholder">
+                    <h2>请导入书籍</h2>
+                    <p>点击或拖拽 PDF / EPUB 文件</p>
+                </div>
+                <div class="text-content" id="text-content" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="tool-panel">
+            <div class="panel-card">
+                <div class="panel-header">📚 已导入书籍</div>
+                <div class="panel-body">
+                    <div class="book-list" id="book-list">
+                        <p class="empty-text">暂无书籍</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-body">
+                    <button class="notebook-btn" onclick="window.location.href='/notebook'">
+                        📖 打开生词本
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-header">导入新书</div>
+                <div class="panel-body">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">点击或拖拽</div>
+                        <div class="upload-hint">支持 PDF / EPUB</div>
+                    </div>
+                    <input type="file" id="file-input" accept=".pdf,.epub">
+                </div>
+            </div>
+
+            <div class="panel-card ai-panel">
+                <div class="panel-header">AI ASSISTANT</div>
+                <div class="ai-content" id="ai-content">
+                    <div class="ai-waiting" id="ai-waiting">
+                        <span class="emoji">👋</span>
+                        <p>点击文字查词<br>选中多字解释</p>
+                    </div>
+                    <div id="ai-result" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="selection-popup" id="selection-popup">
+        <button id="explain-btn">📖 解释选中内容</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentBookId = null;
+        let currentBookContent = '';
+        let isMouseDown = false;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+
+        function getHighlightKey(bookId) {
+            return `highlights_book_${bookId}`;
+        }
+
+        function loadHighlights(bookId) {
+            const key = getHighlightKey(bookId);
+            const data = localStorage.getItem(key);
+            return data ? new Set(JSON.parse(data)) : new Set();
+        }
+
+        function saveHighlights(bookId, highlights) {
+            const key = getHighlightKey(bookId);
+            localStorage.setItem(key, JSON.stringify([...highlights]));
+        }
+
+        let highlightedIndices = new Set();
+
+        // 保存和恢复当前阅读的书籍
+        function saveCurrentBook(bookId) {
+            if (bookId) {
+                localStorage.setItem('currentBookId', bookId);
+            } else {
+                localStorage.removeItem('currentBookId');
+            }
+        }
+
+        function getSavedBookId() {
+            const saved = localStorage.getItem('currentBookId');
+            return saved ? parseInt(saved) : null;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadBooks();
+            setupUpload();
+            setupInteraction();
+
+            // 恢复上次阅读的书籍
+            const savedBookId = getSavedBookId();
+            if (savedBookId) {
+                loadBook(savedBookId);
+            }
+        });
+
+        async function loadBooks() {
+            try {
+                const response = await fetch('/api/books');
+                const books = await response.json();
+                renderBookList(books);
+            } catch (error) {
+                console.error('加载书籍失败:', error);
+            }
+        }
+
+        function renderBookList(books) {
+            const container = document.getElementById('book-list');
+            if (books.length === 0) {
+                container.innerHTML = '<p class="empty-text">暂无书籍</p>';
+                return;
+            }
+
+            container.innerHTML = books.map(book => `
+                <div class="book-item ${currentBookId === book.id ? 'active' : ''}" 
+                     onclick="loadBook(${book.id})">
+                    <div class="book-info">
+                        <div class="book-name">${book.title}</div>
+                        <div class="book-meta">${book.file_type.toUpperCase()}</div>
+                    </div>
+                    <button class="book-delete" onclick="event.stopPropagation(); deleteBook(${book.id})">删除</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadBook(bookId) {
+            showToast('正在加载...');
+            try {
+                const response = await fetch(`/api/book/${bookId}`);
+                const book = await response.json();
+
+                if (book.error) {
+                    showToast(book.error);
+                    saveCurrentBook(null);
+                    return;
+                }
+
+                currentBookId = bookId;
+                currentBookContent = book.content || '';
+
+                // 加载该书籍的高亮数据
+                highlightedIndices = loadHighlights(bookId);
+                console.log('[DEBUG] 加载书籍:', bookId, '高亮数量:', highlightedIndices.size, '高亮索引:', [...highlightedIndices]);
+
+                saveCurrentBook(bookId);
+
+                document.getElementById('current-book-title').textContent = book.title;
+                document.getElementById('reader-placeholder').style.display = 'none';
+                document.getElementById('tip-bar').style.display = 'block';
+
+                const textContent = document.getElementById('text-content');
+                textContent.style.display = 'block';
+
+                if (currentBookContent && currentBookContent.trim()) {
+                    renderTextContent(currentBookContent);
+                    showToast('加载成功');
+                } else {
+                    textContent.innerHTML = '<p class="empty-text">无法提取文本内容</p>';
+                    showToast('无法提取文本');
+                }
+
+                loadBooks();
+            } catch (error) {
+                console.error('加载失败:', error);
+                showToast('加载失败');
+            }
+        }
+
+        function renderTextContent(content) {
+            const textContent = document.getElementById('text-content');
+            const paragraphs = content.split(/\n\n+/);
+
+            let globalIndex = 0;
+            textContent.innerHTML = paragraphs.map(para => {
+                if (!para.trim()) return '';
+                const chars = para.split('').map((char) => {
+                    const idx = globalIndex++;
+                    if (char === '\n') return '<br>';
+                    if (char === ' ') return ' ';
+                    if (char === '\t') return '    ';
+                    const isHighlighted = highlightedIndices.has(idx);
+                    const highlightClass = isHighlighted ? ' highlighted' : '';
+                    return `<span class="char${highlightClass}" data-index="${idx}">${char}</span>`;
+                }).join('');
+                return `<p>${chars}</p>`;
+            }).join('');
+        }
+
+        function setupInteraction() {
+            const textContent = document.getElementById('text-content');
+            const popup = document.getElementById('selection-popup');
+            const explainBtn = document.getElementById('explain-btn');
+
+            // 记录鼠标按下位置，用于判断是点击还是拖动
+            textContent.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                isDragging = false;
+                startX = e.clientX;
+                startY = e.clientY;
+            });
+
+            textContent.addEventListener('mousemove', (e) => {
+                if (isMouseDown) {
+                    const dx = Math.abs(e.clientX - startX);
+                    const dy = Math.abs(e.clientY - startY);
+                    if (dx > 5 || dy > 5) {
+                        isDragging = true;
+                    }
+                }
+            });
+
+            // 鼠标抬起时处理
+            document.addEventListener('mouseup', (e) => {
+                if (!isMouseDown) return;
+                isMouseDown = false;
+
+                setTimeout(() => {
+                    const selection = window.getSelection();
+                    const selectedText = selection.toString().trim();
+
+                    // 如果有选中多个字符，显示弹窗
+                    if (selectedText.length > 1) {
+                        try {
+                            const range = selection.getRangeAt(0);
+                            const rect = range.getBoundingClientRect();
+
+                            let left = rect.left + rect.width / 2 - 80;
+                            left = Math.max(10, Math.min(left, window.innerWidth - 180));
+
+                            popup.style.left = left + 'px';
+                            popup.style.top = (rect.top - 50) + 'px';
+                            popup.style.display = 'block';
+                        } catch (err) {
+                            popup.style.display = 'none';
+                        }
+                    } else if (selectedText.length <= 1 && !isDragging) {
+                        // 单击某个字
+                        popup.style.display = 'none';
+
+                        if (e.target.classList.contains('char')) {
+                            handleCharClick(e.target);
+                        }
+                    } else {
+                        popup.style.display = 'none';
+                    }
+                }, 20);
+            });
+
+            // 点击其他地方关闭弹窗
+            document.addEventListener('mousedown', (e) => {
+                if (!popup.contains(e.target) && !textContent.contains(e.target)) {
+                    popup.style.display = 'none';
+                }
+            });
+
+            // 解释按钮点击
+            explainBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                explainSelection();
+            });
+        }
+
+        function handleCharClick(target) {
+            const char = target.textContent;
+            const index = parseInt(target.dataset.index);
+
+            if (!char || isNaN(index)) return;
+
+            // 如果已经高亮，再次点击取消高亮（不查询API）
+            if (target.classList.contains('highlighted')) {
+                target.classList.remove('highlighted');
+                target.classList.remove('active');
+                highlightedIndices.delete(index);
+                saveHighlights(currentBookId, highlightedIndices);
+                console.log('[DEBUG] 取消高亮, 索引:', index, '剩余高亮:', highlightedIndices.size);
+                showToast('已取消高亮');
+                return; // 直接返回，不查询
+            }
+
+            // 添加高亮并查询
+            document.querySelectorAll('.char.active').forEach(el => el.classList.remove('active'));
+            target.classList.add('active');
+            target.classList.add('highlighted');
+            highlightedIndices.add(index);
+            saveHighlights(currentBookId, highlightedIndices);
+            console.log('[DEBUG] 添加高亮, 索引:', index, '当前高亮:', highlightedIndices.size);
+
+            // 获取上下文
+            const allChars = document.querySelectorAll('.char');
+            const charArray = Array.from(allChars);
+            const charIndex = charArray.indexOf(target);
+
+            let context = '';
+            for (let i = Math.max(0, charIndex - 15); i < Math.min(charArray.length, charIndex + 16); i++) {
+                context += charArray[i].textContent || '';
+            }
+
+            explainWord(char, context);
+        }
+
+        async function explainSelection() {
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+
+            if (!selectedText) return;
+
+            document.getElementById('selection-popup').style.display = 'none';
+
+            // 高亮选中的字符
+            const container = document.getElementById('text-content');
+            const allChars = container.querySelectorAll('.char');
+
+            try {
+                const range = selection.getRangeAt(0);
+                allChars.forEach(charEl => {
+                    if (range.intersectsNode(charEl)) {
+                        charEl.classList.add('highlighted');
+                        const idx = parseInt(charEl.dataset.index);
+                        if (!isNaN(idx)) {
+                            highlightedIndices.add(idx);
+                        }
+                    }
+                });
+                saveHighlights(currentBookId, highlightedIndices);
+            } catch (err) { }
+
+            selection.removeAllRanges();
+
+            // 判断是词语还是句子
+            const isWord = selectedText.length <= 4 && !/[，。！？、；：""''（）【】《》\n]/.test(selectedText);
+
+            showAILoading();
+
+            try {
+                let response;
+                if (isWord) {
+                    response = await fetch('/api/explain/word', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            word: selectedText,
+                            context: selectedText,
+                            book_id: currentBookId
+                        })
+                    });
+                } else {
+                    response = await fetch('/api/explain/sentence', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sentence: selectedText,
+                            book_id: currentBookId
+                        })
+                    });
+                }
+                const result = await response.json();
+                showExplanation(selectedText, result.explanation);
+            } catch (error) {
+                showAIError('解释失败，请重试');
+            }
+        }
+
+        async function explainWord(word, context) {
+            showAILoading();
+
+            try {
+                const response = await fetch('/api/explain/word', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        word: word,
+                        context: context,
+                        book_id: currentBookId
+                    })
+                });
+                const result = await response.json();
+                showExplanation(word, result.explanation);
+            } catch (error) {
+                showAIError('解释失败，请重试');
+            }
+        }
+
+        async function deleteBook(bookId) {
+            if (!confirm('确定要删除这本书吗？')) return;
+
+            try {
+                await fetch(`/api/book/${bookId}`, { method: 'DELETE' });
+                localStorage.removeItem(getHighlightKey(bookId));
+
+                if (currentBookId === bookId) {
+                    currentBookId = null;
+                    currentBookContent = '';
+                    highlightedIndices.clear();
+                    // 清除保存的书籍 ID
+                    saveCurrentBook(null);
+                    document.getElementById('current-book-title').textContent = '古诗文学习';
+                    document.getElementById('reader-placeholder').style.display = 'flex';
+                    document.getElementById('tip-bar').style.display = 'none';
+                    document.getElementById('text-content').style.display = 'none';
+                }
+                loadBooks();
+                showToast('删除成功');
+            } catch (error) {
+                showToast('删除失败');
+            }
+        }
+
+        function setupUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    uploadFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    uploadFile(e.target.files[0]);
+                }
+            });
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            showToast('正在上传...');
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('上传成功');
+                    loadBooks();
+                    loadBook(result.book_id);
+                } else {
+                    showToast(result.error || '上传失败');
+                }
+            } catch (error) {
+                showToast('上传失败');
+            }
+        }
+
+        function showAILoading() {
+            document.getElementById('ai-waiting').style.display = 'none';
+            document.getElementById('ai-result').style.display = 'block';
+            document.getElementById('ai-result').innerHTML = `
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+                    <span>正在查询...</span>
+                </div>
+            `;
+        }
+
+        function showExplanation(word, explanation) {
+            document.getElementById('ai-result').innerHTML = `
+                <div class="explanation-result">
+                    <div class="explanation-word">${word}</div>
+                    <div class="explanation-text">${explanation || '暂无解释'}</div>
+                </div>
+            `;
+        }
+
+        function showAIError(message) {
+            document.getElementById('ai-result').innerHTML = `
+                <div style="color: #e74c3c; text-align: center; padding: 20px;">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+
+</html>
