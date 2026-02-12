@@ -476,7 +476,7 @@
 
             <div class="panel-card">
                 <div class="panel-body">
-                    <button class="notebook-btn" onclick="window.location.href='/notebook'">
+                    <button class="notebook-btn" onclick="openNotebook()">
                         📖 打开生词本
                     </button>
                 </div>
@@ -527,12 +527,29 @@
         function loadHighlights(bookId) {
             const key = getHighlightKey(bookId);
             const data = localStorage.getItem(key);
-            return data ? new Set(JSON.parse(data)) : new Set();
+            console.log('[DEBUG] loadHighlights - key:', key, 'data:', data);
+            if (data) {
+                try {
+                    const arr = JSON.parse(data);
+                    console.log('[DEBUG] loadHighlights - 解析成功, 数量:', arr.length);
+                    return new Set(arr);
+                } catch (e) {
+                    console.error('[DEBUG] loadHighlights - 解析失败:', e);
+                    return new Set();
+                }
+            }
+            return new Set();
         }
 
         function saveHighlights(bookId, highlights) {
+            if (!bookId) {
+                console.warn('[DEBUG] saveHighlights - bookId 为空，跳过保存');
+                return;
+            }
             const key = getHighlightKey(bookId);
-            localStorage.setItem(key, JSON.stringify([...highlights]));
+            const arr = [...highlights];
+            console.log('[DEBUG] saveHighlights - key:', key, '数量:', arr.length);
+            localStorage.setItem(key, JSON.stringify(arr));
         }
 
         let highlightedIndices = new Set();
@@ -551,6 +568,24 @@
             return saved ? parseInt(saved) : null;
         }
 
+        // 保存和恢复滚动位置
+        function saveScrollPosition() {
+            if (currentBookId) {
+                const readerContent = document.getElementById('reader-content');
+                localStorage.setItem(`scrollPos_${currentBookId}`, readerContent.scrollTop);
+            }
+        }
+
+        function restoreScrollPosition(bookId) {
+            const saved = localStorage.getItem(`scrollPos_${bookId}`);
+            if (saved) {
+                const readerContent = document.getElementById('reader-content');
+                setTimeout(() => {
+                    readerContent.scrollTop = parseInt(saved);
+                }, 100);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             await loadBooks();
             setupUpload();
@@ -559,7 +594,7 @@
             // 恢复上次阅读的书籍
             const savedBookId = getSavedBookId();
             if (savedBookId) {
-                loadBook(savedBookId);
+                loadBook(savedBookId, true); // true 表示需要恢复滚动位置
             }
         });
 
@@ -592,7 +627,7 @@
             `).join('');
         }
 
-        async function loadBook(bookId) {
+        async function loadBook(bookId, restoreScroll = false) {
             showToast('正在加载...');
             try {
                 const response = await fetch(`/api/book/${bookId}`);
@@ -609,7 +644,7 @@
 
                 // 加载该书籍的高亮数据
                 highlightedIndices = loadHighlights(bookId);
-                console.log('[DEBUG] 加载书籍:', bookId, '高亮数量:', highlightedIndices.size, '高亮索引:', [...highlightedIndices]);
+                console.log('[DEBUG] 加载书籍:', bookId, '高亮数量:', highlightedIndices.size);
 
                 saveCurrentBook(bookId);
 
@@ -623,6 +658,11 @@
                 if (currentBookContent && currentBookContent.trim()) {
                     renderTextContent(currentBookContent);
                     showToast('加载成功');
+
+                    // 恢复滚动位置
+                    if (restoreScroll) {
+                        restoreScrollPosition(bookId);
+                    }
                 } else {
                     textContent.innerHTML = '<p class="empty-text">无法提取文本内容</p>';
                     showToast('无法提取文本');
@@ -638,6 +678,11 @@
         function renderTextContent(content) {
             const textContent = document.getElementById('text-content');
             const paragraphs = content.split(/\n\n+/);
+
+            console.log('[DEBUG] renderTextContent - highlightedIndices 数量:', highlightedIndices.size);
+            if (highlightedIndices.size > 0) {
+                console.log('[DEBUG] renderTextContent - 高亮索引:', [...highlightedIndices].slice(0, 10));
+            }
 
             let globalIndex = 0;
             textContent.innerHTML = paragraphs.map(para => {
@@ -962,6 +1007,13 @@
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function openNotebook() {
+            // 保存当前滚动位置
+            saveScrollPosition();
+            // 跳转到生词本
+            window.location.href = '/notebook';
         }
     </script>
 </body>
