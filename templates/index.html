@@ -5,11 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>古诗文学习</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap"
-        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -21,20 +16,18 @@
             --bg-primary: #faf8f5;
             --bg-secondary: #ffffff;
             --text-primary: #2c2c2c;
-            --text-secondary: #666666;
+            --text-secondary: #666;
             --accent: #8b5a2b;
             --accent-light: #d4a574;
             --border: #e8e4df;
-            --shadow: rgba(139, 90, 43, 0.08);
             --highlight: #fff3cd;
             --highlight-border: #ffc107;
         }
 
         body {
-            font-family: 'Noto Serif SC', serif;
+            font-family: "Noto Serif SC", "Songti SC", serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            min-height: 100vh;
             line-height: 1.8;
         }
 
@@ -43,44 +36,42 @@
             height: 100vh;
             max-width: 1600px;
             margin: 0 auto;
-            padding: 20px;
-            gap: 20px;
+            padding: 16px;
+            gap: 16px;
         }
 
         .reader-panel {
             flex: 1;
             background: var(--bg-secondary);
-            border-radius: 16px;
-            box-shadow: 0 4px 24px var(--shadow);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
         .reader-header {
-            padding: 20px 24px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
         }
 
         .reader-title {
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--accent);
+        }
+
+        .tip-bar {
+            padding: 8px 20px;
+            background: #fffbeb;
+            font-size: 0.8rem;
+            color: var(--accent);
+            display: none;
         }
 
         .reader-content {
             flex: 1;
-            padding: 32px;
+            padding: 24px;
             overflow-y: auto;
-        }
-
-        .reader-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .reader-content::-webkit-scrollbar-thumb {
-            background: var(--accent-light);
-            border-radius: 3px;
         }
 
         .reader-placeholder {
@@ -93,29 +84,17 @@
         }
 
         .reader-placeholder h2 {
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 2rem;
-            margin-bottom: 16px;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
             color: var(--accent-light);
         }
 
         .text-content {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             line-height: 2.2;
-            text-align: justify;
-            user-select: text;
-            -webkit-user-select: text;
         }
 
-        .text-content p {
-            margin-bottom: 1em;
-        }
-
-        .text-content::selection {
-            background: var(--accent-light);
-            color: white;
-        }
-
+        .text-content::selection,
         .text-content *::selection {
             background: var(--accent-light);
             color: white;
@@ -123,12 +102,11 @@
 
         .char {
             cursor: pointer;
-            transition: background 0.15s;
-            border-radius: 2px;
         }
 
         .char:hover {
             background: rgba(139, 90, 43, 0.15);
+            border-radius: 2px;
         }
 
         .char.highlighted {
@@ -142,21 +120,20 @@
         }
 
         .tool-panel {
-            width: 360px;
+            width: 340px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
         .panel-card {
             background: var(--bg-secondary);
-            border-radius: 16px;
-            box-shadow: 0 4px 24px var(--shadow);
-            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         }
 
         .panel-header {
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             font-weight: 600;
             color: var(--text-secondary);
@@ -164,11 +141,11 @@
         }
 
         .panel-body {
-            padding: 16px;
+            padding: 12px;
         }
 
         .book-list {
-            max-height: 180px;
+            max-height: 160px;
             overflow-y: auto;
         }
 
@@ -176,10 +153,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
-            border-radius: 8px;
+            padding: 8px 10px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s;
             margin-bottom: 4px;
         }
 
@@ -191,13 +167,7 @@
             background: rgba(139, 90, 43, 0.1);
         }
 
-        .book-info {
-            flex: 1;
-            min-width: 0;
-        }
-
         .book-name {
-            font-weight: 600;
             font-size: 0.9rem;
             white-space: nowrap;
             overflow: hidden;
@@ -205,20 +175,19 @@
         }
 
         .book-meta {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
         }
 
         .book-delete {
-            padding: 4px 8px;
-            background: transparent;
+            padding: 2px 6px;
             border: 1px solid #e74c3c;
             color: #e74c3c;
+            background: none;
             border-radius: 4px;
             font-size: 0.7rem;
             cursor: pointer;
             opacity: 0;
-            transition: all 0.2s;
         }
 
         .book-item:hover .book-delete {
@@ -232,38 +201,23 @@
 
         .upload-area {
             border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 8px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         .upload-area:hover {
             border-color: var(--accent-light);
-            background: rgba(139, 90, 43, 0.02);
-        }
-
-        .upload-area.dragover {
-            border-color: var(--accent);
-            background: rgba(139, 90, 43, 0.05);
         }
 
         .upload-icon {
-            font-size: 2rem;
-            margin-bottom: 8px;
+            font-size: 1.5rem;
         }
 
         .upload-text {
             color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .upload-hint {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            opacity: 0.7;
+            font-size: 0.85rem;
         }
 
         #file-input {
@@ -272,39 +226,31 @@
 
         .notebook-btn {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
             color: white;
             border: none;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 0.95rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .notebook-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 90, 43, 0.25);
+            opacity: 0.9;
         }
 
         .ai-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 250px;
+            min-height: 200px;
         }
 
         .ai-content {
             flex: 1;
-            padding: 16px;
+            padding: 12px;
             overflow-y: auto;
-            font-size: 0.9rem;
-            line-height: 1.8;
+            font-size: 0.85rem;
         }
 
         .ai-waiting {
@@ -314,12 +260,6 @@
             justify-content: center;
             align-items: center;
             color: var(--text-secondary);
-            text-align: center;
-        }
-
-        .ai-waiting .emoji {
-            font-size: 2rem;
-            margin-bottom: 12px;
         }
 
         .ai-loading {
@@ -329,9 +269,9 @@
             color: var(--accent);
         }
 
-        .ai-loading .spinner {
-            width: 18px;
-            height: 18px;
+        .spinner {
+            width: 16px;
+            height: 16px;
             border: 2px solid var(--border);
             border-top-color: var(--accent);
             border-radius: 50%;
@@ -346,72 +286,56 @@
 
         .explanation-result {
             background: var(--bg-primary);
-            border-radius: 10px;
-            padding: 14px;
+            border-radius: 8px;
+            padding: 12px;
         }
 
         .explanation-word {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--accent);
-            margin-bottom: 10px;
-            padding-bottom: 10px;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--border);
         }
 
         .explanation-text {
             white-space: pre-wrap;
-            font-size: 0.88rem;
-            line-height: 1.9;
+            line-height: 1.8;
         }
 
         .selection-popup {
             position: fixed;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            padding: 6px;
             display: none;
             z-index: 1000;
-            border: 1px solid var(--border);
         }
 
         .selection-popup button {
-            padding: 10px 16px;
+            padding: 8px 12px;
             background: var(--accent);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 0.9rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
-
-        .selection-popup button:hover {
-            background: var(--accent-light);
-        }
-
-        .empty-text {
-            color: var(--text-secondary);
-            text-align: center;
-            padding: 20px 0;
-            font-size: 0.9rem;
         }
 
         .toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 24px;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--text-primary);
+            transform: translateX(-50%) translateY(80px);
+            background: #333;
             color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             opacity: 0;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             z-index: 2000;
         }
 
@@ -420,29 +344,23 @@
             opacity: 1;
         }
 
-        .tip-bar {
-            padding: 10px 20px;
-            background: rgba(139, 90, 43, 0.08);
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-            color: var(--accent);
-            display: none;
+        .empty-text {
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 16px;
         }
 
-        @media (max-width: 1024px) {
+        .paragraph {
+            margin-bottom: 1.5em;
+        }
+
+        @media (max-width: 900px) {
             .container {
                 flex-direction: column;
             }
 
             .tool-panel {
                 width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .panel-card {
-                flex: 1;
-                min-width: 280px;
             }
         }
     </style>
@@ -452,568 +370,430 @@
     <div class="container">
         <div class="reader-panel">
             <div class="reader-header">
-                <h1 class="reader-title" id="current-book-title">古诗文学习</h1>
+                <h1 class="reader-title" id="book-title">古诗文学习</h1>
             </div>
-            <div class="tip-bar" id="tip-bar">💡 单击字查词 | 拖动选择多字后点击弹出按钮解释 | 再次点击黄色高亮字可取消</div>
+            <div class="tip-bar" id="tip-bar">💡 单击查字 | 选中多字点击按钮解释 | 再次点击黄色高亮可取消</div>
             <div class="reader-content" id="reader-content">
-                <div class="reader-placeholder" id="reader-placeholder">
+                <div class="reader-placeholder" id="placeholder">
                     <h2>请导入书籍</h2>
-                    <p>点击或拖拽 PDF / EPUB 文件</p>
+                    <p>支持 PDF / EPUB 格式</p>
                 </div>
-                <div class="text-content" id="text-content" style="display: none;"></div>
+                <div class="text-content" id="text-content" style="display:none;"></div>
             </div>
         </div>
 
         <div class="tool-panel">
             <div class="panel-card">
-                <div class="panel-header">📚 已导入书籍</div>
+                <div class="panel-header">📚 书籍</div>
                 <div class="panel-body">
                     <div class="book-list" id="book-list">
-                        <p class="empty-text">暂无书籍</p>
+                        <p class="empty-text">暂无</p>
                     </div>
                 </div>
             </div>
 
             <div class="panel-card">
                 <div class="panel-body">
-                    <button class="notebook-btn" onclick="openNotebook()">
-                        📖 打开生词本
-                    </button>
+                    <button class="notebook-btn" onclick="openNotebook()">📖 生词本</button>
                 </div>
             </div>
 
             <div class="panel-card">
-                <div class="panel-header">导入新书</div>
+                <div class="panel-header">导入</div>
                 <div class="panel-body">
                     <div class="upload-area" id="upload-area">
                         <div class="upload-icon">📁</div>
-                        <div class="upload-text">点击或拖拽</div>
-                        <div class="upload-hint">支持 PDF / EPUB</div>
+                        <div class="upload-text">点击或拖拽文件</div>
                     </div>
                     <input type="file" id="file-input" accept=".pdf,.epub">
                 </div>
             </div>
 
             <div class="panel-card ai-panel">
-                <div class="panel-header">AI ASSISTANT</div>
+                <div class="panel-header">AI 解释</div>
                 <div class="ai-content" id="ai-content">
                     <div class="ai-waiting" id="ai-waiting">
-                        <span class="emoji">👋</span>
-                        <p>点击文字查词<br>选中多字解释</p>
+                        <p>点击或选中文字查询</p>
                     </div>
-                    <div id="ai-result" style="display: none;"></div>
+                    <div id="ai-result" style="display:none;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="selection-popup" id="selection-popup">
-        <button id="explain-btn">📖 解释选中内容</button>
+    <div class="selection-popup" id="popup">
+        <button onclick="explainSelection()">📖 解释</button>
     </div>
-
     <div class="toast" id="toast"></div>
 
     <script>
         let currentBookId = null;
-        let currentBookContent = '';
-        let isMouseDown = false;
-        let isDragging = false;
-        let startX = 0, startY = 0;
-
-        function getHighlightKey(bookId) {
-            return `highlights_book_${bookId}`;
-        }
-
-        function loadHighlights(bookId) {
-            const key = getHighlightKey(bookId);
-            const data = localStorage.getItem(key);
-            console.log('[DEBUG] loadHighlights - key:', key, 'data:', data);
-            if (data) {
-                try {
-                    const arr = JSON.parse(data);
-                    console.log('[DEBUG] loadHighlights - 解析成功, 数量:', arr.length);
-                    return new Set(arr);
-                } catch (e) {
-                    console.error('[DEBUG] loadHighlights - 解析失败:', e);
-                    return new Set();
-                }
-            }
-            return new Set();
-        }
-
-        function saveHighlights(bookId, highlights) {
-            if (!bookId) {
-                console.warn('[DEBUG] saveHighlights - bookId 为空，跳过保存');
-                return;
-            }
-            const key = getHighlightKey(bookId);
-            const arr = [...highlights];
-            console.log('[DEBUG] saveHighlights - key:', key, '数量:', arr.length);
-            localStorage.setItem(key, JSON.stringify(arr));
-        }
-
+        let currentContent = '';
         let highlightedIndices = new Set();
 
-        // 保存和恢复当前阅读的书籍
-        function saveCurrentBook(bookId) {
-            if (bookId) {
-                localStorage.setItem('currentBookId', bookId);
-            } else {
-                localStorage.removeItem('currentBookId');
-            }
+        // 高亮存储
+        function getHighlightKey(id) { return `hl_${id}`; }
+        function loadHighlights(id) {
+            const d = localStorage.getItem(getHighlightKey(id));
+            return d ? new Set(JSON.parse(d)) : new Set();
+        }
+        function saveHighlights(id, set) {
+            localStorage.setItem(getHighlightKey(id), JSON.stringify([...set]));
         }
 
-        function getSavedBookId() {
-            const saved = localStorage.getItem('currentBookId');
-            return saved ? parseInt(saved) : null;
-        }
-
-        // 保存和恢复滚动位置
-        function saveScrollPosition() {
-            if (currentBookId) {
-                const readerContent = document.getElementById('reader-content');
-                localStorage.setItem(`scrollPos_${currentBookId}`, readerContent.scrollTop);
-            }
-        }
-
-        function restoreScrollPosition(bookId) {
-            const saved = localStorage.getItem(`scrollPos_${bookId}`);
-            if (saved) {
-                const readerContent = document.getElementById('reader-content');
-                setTimeout(() => {
-                    readerContent.scrollTop = parseInt(saved);
-                }, 100);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadBooks();
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBooks();
             setupUpload();
-            setupInteraction();
+            setupSelection();
 
-            // 恢复上次阅读的书籍
-            const savedBookId = getSavedBookId();
-            if (savedBookId) {
-                loadBook(savedBookId, true); // true 表示需要恢复滚动位置
-            }
+            const savedId = localStorage.getItem('currentBookId');
+            if (savedId) loadBook(parseInt(savedId), true);
         });
 
+        // 加载书籍列表
         async function loadBooks() {
             try {
-                const response = await fetch('/api/books');
-                const books = await response.json();
-                renderBookList(books);
-            } catch (error) {
-                console.error('加载书籍失败:', error);
-            }
-        }
+                const res = await fetch('/api/books');
+                const books = await res.json();
+                const list = document.getElementById('book-list');
 
-        function renderBookList(books) {
-            const container = document.getElementById('book-list');
-            if (books.length === 0) {
-                container.innerHTML = '<p class="empty-text">暂无书籍</p>';
-                return;
-            }
-
-            container.innerHTML = books.map(book => `
-                <div class="book-item ${currentBookId === book.id ? 'active' : ''}" 
-                     onclick="loadBook(${book.id})">
-                    <div class="book-info">
-                        <div class="book-name">${book.title}</div>
-                        <div class="book-meta">${book.file_type.toUpperCase()}</div>
-                    </div>
-                    <button class="book-delete" onclick="event.stopPropagation(); deleteBook(${book.id})">删除</button>
-                </div>
-            `).join('');
-        }
-
-        async function loadBook(bookId, restoreScroll = false) {
-            showToast('正在加载...');
-            try {
-                const response = await fetch(`/api/book/${bookId}`);
-                const book = await response.json();
-
-                if (book.error) {
-                    showToast(book.error);
-                    saveCurrentBook(null);
+                if (!books.length) {
+                    list.innerHTML = '<p class="empty-text">暂无</p>';
                     return;
                 }
 
-                currentBookId = bookId;
-                currentBookContent = book.content || '';
+                list.innerHTML = books.map(b => `
+                    <div class="book-item ${currentBookId === b.id ? 'active' : ''}" onclick="loadBook(${b.id})">
+                        <div>
+                            <div class="book-name">${b.title}</div>
+                            <div class="book-meta">${b.file_type.toUpperCase()}</div>
+                        </div>
+                        <button class="book-delete" onclick="event.stopPropagation();deleteBook(${b.id})">删除</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+            }
+        }
 
-                // 加载该书籍的高亮数据
-                highlightedIndices = loadHighlights(bookId);
-                console.log('[DEBUG] 加载书籍:', bookId, '高亮数量:', highlightedIndices.size);
+        // 加载书籍内容
+        async function loadBook(id, restore = false) {
+            showToast('加载中...');
+            try {
+                const res = await fetch(`/api/book/${id}`);
+                const book = await res.json();
 
-                saveCurrentBook(bookId);
+                if (book.error) {
+                    showToast(book.error);
+                    localStorage.removeItem('currentBookId');
+                    return;
+                }
 
-                document.getElementById('current-book-title').textContent = book.title;
-                document.getElementById('reader-placeholder').style.display = 'none';
+                currentBookId = id;
+                currentContent = book.content || '';
+                highlightedIndices = loadHighlights(id);
+                localStorage.setItem('currentBookId', id);
+
+                document.getElementById('book-title').textContent = book.title;
+                document.getElementById('placeholder').style.display = 'none';
                 document.getElementById('tip-bar').style.display = 'block';
 
-                const textContent = document.getElementById('text-content');
-                textContent.style.display = 'block';
+                const tc = document.getElementById('text-content');
+                tc.style.display = 'block';
 
-                if (currentBookContent && currentBookContent.trim()) {
-                    renderTextContent(currentBookContent);
-                    showToast('加载成功');
+                // 分段渲染，每段最多1000字，分批处理
+                renderContent(currentContent);
 
-                    // 恢复滚动位置
-                    if (restoreScroll) {
-                        restoreScrollPosition(bookId);
+                if (restore) {
+                    const pos = localStorage.getItem(`scroll_${id}`);
+                    if (pos) {
+                        setTimeout(() => {
+                            document.getElementById('reader-content').scrollTop = parseInt(pos);
+                        }, 100);
                     }
-                } else {
-                    textContent.innerHTML = '<p class="empty-text">无法提取文本内容</p>';
-                    showToast('无法提取文本');
                 }
 
                 loadBooks();
-            } catch (error) {
-                console.error('加载失败:', error);
+                showToast('加载成功');
+            } catch (e) {
                 showToast('加载失败');
             }
         }
 
-        function renderTextContent(content) {
-            const textContent = document.getElementById('text-content');
-            const paragraphs = content.split(/\n\n+/);
+        // 渲染内容 - 分段处理提高性能
+        function renderContent(content) {
+            const tc = document.getElementById('text-content');
+            tc.innerHTML = '';
 
-            console.log('[DEBUG] renderTextContent - highlightedIndices 数量:', highlightedIndices.size);
-            if (highlightedIndices.size > 0) {
-                console.log('[DEBUG] renderTextContent - 高亮索引:', [...highlightedIndices].slice(0, 10));
+            // 按段落分割
+            const paragraphs = content.split(/\n\n+/);
+            const maxCharsPerBatch = 5000; // 每批最多处理的字符
+            let totalIndex = 0;
+            let currentBatch = '';
+            let batchCount = 0;
+
+            paragraphs.forEach((para, pIdx) => {
+                if (!para.trim()) return;
+
+                let paraHtml = '<div class="paragraph">';
+                for (let i = 0; i < para.length; i++) {
+                    const char = para[i];
+                    const idx = totalIndex++;
+
+                    if (char === '\n') {
+                        paraHtml += '<br>';
+                    } else if (char === ' ') {
+                        paraHtml += ' ';
+                    } else if (/[，。！？、；：""''（）【】《》\s]/.test(char)) {
+                        // 标点符号不可点击
+                        paraHtml += char;
+                    } else {
+                        const hl = highlightedIndices.has(idx) ? ' highlighted' : '';
+                        paraHtml += `<span class="char${hl}" data-i="${idx}">${char}</span>`;
+                    }
+                }
+                paraHtml += '</div>';
+                currentBatch += paraHtml;
+
+                // 每累积一定量就添加到 DOM
+                if (currentBatch.length > maxCharsPerBatch) {
+                    const div = document.createElement('div');
+                    div.innerHTML = currentBatch;
+                    while (div.firstChild) tc.appendChild(div.firstChild);
+                    currentBatch = '';
+                    batchCount++;
+                }
+            });
+
+            // 添加剩余内容
+            if (currentBatch) {
+                const div = document.createElement('div');
+                div.innerHTML = currentBatch;
+                while (div.firstChild) tc.appendChild(div.firstChild);
             }
 
-            let globalIndex = 0;
-            textContent.innerHTML = paragraphs.map(para => {
-                if (!para.trim()) return '';
-                const chars = para.split('').map((char) => {
-                    const idx = globalIndex++;
-                    if (char === '\n') return '<br>';
-                    if (char === ' ') return ' ';
-                    if (char === '\t') return '    ';
-                    const isHighlighted = highlightedIndices.has(idx);
-                    const highlightClass = isHighlighted ? ' highlighted' : '';
-                    return `<span class="char${highlightClass}" data-index="${idx}">${char}</span>`;
-                }).join('');
-                return `<p>${chars}</p>`;
-            }).join('');
+            // 添加点击事件（事件委托）
+            tc.onclick = handleClick;
         }
 
-        function setupInteraction() {
-            const textContent = document.getElementById('text-content');
-            const popup = document.getElementById('selection-popup');
-            const explainBtn = document.getElementById('explain-btn');
+        // 处理点击
+        function handleClick(e) {
+            const target = e.target;
+            if (!target.classList.contains('char')) return;
 
-            // 记录鼠标按下位置，用于判断是点击还是拖动
-            textContent.addEventListener('mousedown', (e) => {
-                isMouseDown = true;
-                isDragging = false;
-                startX = e.clientX;
-                startY = e.clientY;
-            });
+            // 检查是否有选中文字
+            const sel = window.getSelection();
+            if (sel.toString().trim().length > 1) return;
 
-            textContent.addEventListener('mousemove', (e) => {
-                if (isMouseDown) {
-                    const dx = Math.abs(e.clientX - startX);
-                    const dy = Math.abs(e.clientY - startY);
-                    if (dx > 5 || dy > 5) {
-                        isDragging = true;
-                    }
-                }
-            });
-
-            // 鼠标抬起时处理
-            document.addEventListener('mouseup', (e) => {
-                if (!isMouseDown) return;
-                isMouseDown = false;
-
-                setTimeout(() => {
-                    const selection = window.getSelection();
-                    const selectedText = selection.toString().trim();
-
-                    // 如果有选中多个字符，显示弹窗
-                    if (selectedText.length > 1) {
-                        try {
-                            const range = selection.getRangeAt(0);
-                            const rect = range.getBoundingClientRect();
-
-                            let left = rect.left + rect.width / 2 - 80;
-                            left = Math.max(10, Math.min(left, window.innerWidth - 180));
-
-                            popup.style.left = left + 'px';
-                            popup.style.top = (rect.top - 50) + 'px';
-                            popup.style.display = 'block';
-                        } catch (err) {
-                            popup.style.display = 'none';
-                        }
-                    } else if (selectedText.length <= 1 && !isDragging) {
-                        // 单击某个字
-                        popup.style.display = 'none';
-
-                        if (e.target.classList.contains('char')) {
-                            handleCharClick(e.target);
-                        }
-                    } else {
-                        popup.style.display = 'none';
-                    }
-                }, 20);
-            });
-
-            // 点击其他地方关闭弹窗
-            document.addEventListener('mousedown', (e) => {
-                if (!popup.contains(e.target) && !textContent.contains(e.target)) {
-                    popup.style.display = 'none';
-                }
-            });
-
-            // 解释按钮点击
-            explainBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                explainSelection();
-            });
-        }
-
-        function handleCharClick(target) {
             const char = target.textContent;
-            const index = parseInt(target.dataset.index);
+            const idx = parseInt(target.dataset.i);
 
-            if (!char || isNaN(index)) return;
-
-            // 如果已经高亮，再次点击取消高亮（不查询API）
+            // 已高亮则取消
             if (target.classList.contains('highlighted')) {
                 target.classList.remove('highlighted');
-                target.classList.remove('active');
-                highlightedIndices.delete(index);
+                highlightedIndices.delete(idx);
                 saveHighlights(currentBookId, highlightedIndices);
-                console.log('[DEBUG] 取消高亮, 索引:', index, '剩余高亮:', highlightedIndices.size);
                 showToast('已取消高亮');
-                return; // 直接返回，不查询
+                return;
             }
 
-            // 添加高亮并查询
+            // 添加高亮
             document.querySelectorAll('.char.active').forEach(el => el.classList.remove('active'));
-            target.classList.add('active');
-            target.classList.add('highlighted');
-            highlightedIndices.add(index);
+            target.classList.add('active', 'highlighted');
+            highlightedIndices.add(idx);
             saveHighlights(currentBookId, highlightedIndices);
-            console.log('[DEBUG] 添加高亮, 索引:', index, '当前高亮:', highlightedIndices.size);
 
             // 获取上下文
-            const allChars = document.querySelectorAll('.char');
-            const charArray = Array.from(allChars);
-            const charIndex = charArray.indexOf(target);
-
-            let context = '';
-            for (let i = Math.max(0, charIndex - 15); i < Math.min(charArray.length, charIndex + 16); i++) {
-                context += charArray[i].textContent || '';
+            const chars = document.querySelectorAll('.char');
+            const arr = Array.from(chars);
+            const pos = arr.indexOf(target);
+            let ctx = '';
+            for (let i = Math.max(0, pos - 10); i < Math.min(arr.length, pos + 11); i++) {
+                ctx += arr[i].textContent;
             }
 
-            explainWord(char, context);
+            explainWord(char, ctx);
         }
 
-        async function explainSelection() {
-            const selection = window.getSelection();
-            const selectedText = selection.toString().trim();
-
-            if (!selectedText) return;
-
-            document.getElementById('selection-popup').style.display = 'none';
-
-            // 高亮选中的字符
-            const container = document.getElementById('text-content');
-            const allChars = container.querySelectorAll('.char');
-
-            try {
-                const range = selection.getRangeAt(0);
-                allChars.forEach(charEl => {
-                    if (range.intersectsNode(charEl)) {
-                        charEl.classList.add('highlighted');
-                        const idx = parseInt(charEl.dataset.index);
-                        if (!isNaN(idx)) {
-                            highlightedIndices.add(idx);
-                        }
-                    }
-                });
-                saveHighlights(currentBookId, highlightedIndices);
-            } catch (err) { }
-
-            selection.removeAllRanges();
-
-            // 判断是词语还是句子
-            const isWord = selectedText.length <= 4 && !/[，。！？、；：""''（）【】《》\n]/.test(selectedText);
-
-            showAILoading();
-
-            try {
-                let response;
-                if (isWord) {
-                    response = await fetch('/api/explain/word', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            word: selectedText,
-                            context: selectedText,
-                            book_id: currentBookId
-                        })
-                    });
-                } else {
-                    response = await fetch('/api/explain/sentence', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            sentence: selectedText,
-                            book_id: currentBookId
-                        })
-                    });
-                }
-                const result = await response.json();
-                showExplanation(selectedText, result.explanation);
-            } catch (error) {
-                showAIError('解释失败，请重试');
+        // 删除书籍
+        async function deleteBook(id) {
+            if (!confirm('确定删除？')) return;
+            await fetch(`/api/book/${id}`, { method: 'DELETE' });
+            localStorage.removeItem(`scroll_${id}`);
+            localStorage.removeItem(getHighlightKey(id));
+            if (currentBookId === id) {
+                currentBookId = null;
+                currentContent = '';
+                highlightedIndices.clear();
+                localStorage.removeItem('currentBookId');
+                document.getElementById('book-title').textContent = '古诗文学习';
+                document.getElementById('placeholder').style.display = 'flex';
+                document.getElementById('tip-bar').style.display = 'none';
+                document.getElementById('text-content').style.display = 'none';
             }
+            loadBooks();
+            showToast('已删除');
         }
 
-        async function explainWord(word, context) {
-            showAILoading();
-
-            try {
-                const response = await fetch('/api/explain/word', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        word: word,
-                        context: context,
-                        book_id: currentBookId
-                    })
-                });
-                const result = await response.json();
-                showExplanation(word, result.explanation);
-            } catch (error) {
-                showAIError('解释失败，请重试');
-            }
-        }
-
-        async function deleteBook(bookId) {
-            if (!confirm('确定要删除这本书吗？')) return;
-
-            try {
-                await fetch(`/api/book/${bookId}`, { method: 'DELETE' });
-                localStorage.removeItem(getHighlightKey(bookId));
-
-                if (currentBookId === bookId) {
-                    currentBookId = null;
-                    currentBookContent = '';
-                    highlightedIndices.clear();
-                    // 清除保存的书籍 ID
-                    saveCurrentBook(null);
-                    document.getElementById('current-book-title').textContent = '古诗文学习';
-                    document.getElementById('reader-placeholder').style.display = 'flex';
-                    document.getElementById('tip-bar').style.display = 'none';
-                    document.getElementById('text-content').style.display = 'none';
-                }
-                loadBooks();
-                showToast('删除成功');
-            } catch (error) {
-                showToast('删除失败');
-            }
-        }
-
+        // 上传
         function setupUpload() {
-            const uploadArea = document.getElementById('upload-area');
-            const fileInput = document.getElementById('file-input');
+            const area = document.getElementById('upload-area');
+            const input = document.getElementById('file-input');
 
-            uploadArea.addEventListener('click', () => fileInput.click());
-
-            uploadArea.addEventListener('dragover', (e) => {
+            area.onclick = () => input.click();
+            area.ondragover = e => { e.preventDefault(); area.style.borderColor = '#8b5a2b'; };
+            area.ondragleave = () => area.style.borderColor = '';
+            area.ondrop = e => {
                 e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) {
-                    uploadFile(e.dataTransfer.files[0]);
-                }
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    uploadFile(e.target.files[0]);
-                }
-            });
+                area.style.borderColor = '';
+                if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
+            };
+            input.onchange = e => { if (e.target.files[0]) uploadFile(e.target.files[0]); };
         }
 
         async function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            showToast('正在上传...');
+            showToast('上传中...');
+            const fd = new FormData();
+            fd.append('file', file);
 
             try {
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-
-                if (result.success) {
+                const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
                     showToast('上传成功');
                     loadBooks();
-                    loadBook(result.book_id);
+                    loadBook(data.book_id);
                 } else {
-                    showToast(result.error || '上传失败');
+                    showToast(data.error || '失败');
                 }
-            } catch (error) {
+            } catch (e) {
                 showToast('上传失败');
             }
         }
 
-        function showAILoading() {
-            document.getElementById('ai-waiting').style.display = 'none';
-            document.getElementById('ai-result').style.display = 'block';
-            document.getElementById('ai-result').innerHTML = `
-                <div class="ai-loading">
-                    <div class="spinner"></div>
-                    <span>正在查询...</span>
-                </div>
-            `;
+        // 文本选择
+        function setupSelection() {
+            const popup = document.getElementById('popup');
+            const tc = document.getElementById('text-content');
+
+            document.addEventListener('mouseup', () => {
+                setTimeout(() => {
+                    const sel = window.getSelection();
+                    const text = sel.toString().trim();
+
+                    if (text.length > 1 && tc.contains(sel.anchorNode)) {
+                        const range = sel.getRangeAt(0);
+                        const rect = range.getBoundingClientRect();
+                        popup.style.left = Math.min(rect.left + rect.width / 2 - 40, window.innerWidth - 100) + 'px';
+                        popup.style.top = (rect.top - 40) + 'px';
+                        popup.style.display = 'block';
+                    } else {
+                        popup.style.display = 'none';
+                    }
+                }, 10);
+            });
+
+            document.addEventListener('mousedown', e => {
+                if (!popup.contains(e.target)) popup.style.display = 'none';
+            });
         }
 
-        function showExplanation(word, explanation) {
+        // 解释选中内容
+        async function explainSelection() {
+            const sel = window.getSelection();
+            const text = sel.toString().trim();
+            if (!text) return;
+
+            document.getElementById('popup').style.display = 'none';
+
+            // 高亮选中的字符
+            const tc = document.getElementById('text-content');
+            const range = sel.getRangeAt(0);
+            tc.querySelectorAll('.char').forEach(el => {
+                if (range.intersectsNode(el)) {
+                    el.classList.add('highlighted');
+                    const idx = parseInt(el.dataset.i);
+                    if (!isNaN(idx)) highlightedIndices.add(idx);
+                }
+            });
+            saveHighlights(currentBookId, highlightedIndices);
+
+            const isWord = text.length <= 4 && !/[，。！？、；：]/.test(text);
+
+            showAILoading();
+
+            try {
+                const endpoint = isWord ? '/api/explain/word' : '/api/explain/sentence';
+                const body = isWord
+                    ? { word: text, context: text, book_id: currentBookId }
+                    : { sentence: text, book_id: currentBookId };
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                showExplanation(text, data.explanation);
+            } catch (e) {
+                showAIError('请求失败');
+            }
+
+            sel.removeAllRanges();
+        }
+
+        // 解释单字
+        async function explainWord(word, context) {
+            showAILoading();
+
+            try {
+                const res = await fetch('/api/explain/word', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word, context, book_id: currentBookId })
+                });
+                const data = await res.json();
+                showExplanation(word, data.explanation);
+            } catch (e) {
+                showAIError('请求失败');
+            }
+        }
+
+        // 打开生词本
+        function openNotebook() {
+            if (currentBookId) {
+                const pos = document.getElementById('reader-content').scrollTop;
+                localStorage.setItem(`scroll_${currentBookId}`, pos);
+            }
+            window.location.href = '/notebook';
+        }
+
+        // AI 显示
+        function showAILoading() {
+            document.getElementById('ai-waiting').style.display = 'none';
+            const r = document.getElementById('ai-result');
+            r.style.display = 'block';
+            r.innerHTML = '<div class="ai-loading"><div class="spinner"></div>查询中...</div>';
+        }
+
+        function showExplanation(word, text) {
             document.getElementById('ai-result').innerHTML = `
                 <div class="explanation-result">
                     <div class="explanation-word">${word}</div>
-                    <div class="explanation-text">${explanation || '暂无解释'}</div>
-                </div>
-            `;
+                    <div class="explanation-text">${text || '暂无'}</div>
+                </div>`;
         }
 
-        function showAIError(message) {
-            document.getElementById('ai-result').innerHTML = `
-                <div style="color: #e74c3c; text-align: center; padding: 20px;">
-                    ${message}
-                </div>
-            `;
+        function showAIError(msg) {
+            document.getElementById('ai-result').innerHTML = `<div style="color:#e74c3c;text-align:center;padding:20px;">${msg}</div>`;
         }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        function openNotebook() {
-            // 保存当前滚动位置
-            saveScrollPosition();
-            // 跳转到生词本
-            window.location.href = '/notebook';
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
         }
     </script>
 </body>
