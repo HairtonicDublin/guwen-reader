@@ -178,10 +178,11 @@ def upload_file():
     
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        # 添加时间戳避免重名
         name, ext = os.path.splitext(filename)
-        filename = f"{name}_{datetime.now().strftime('%Y%m%d%H%M%S')}{ext}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # 保存文件
+        save_filename = f"{name}_{datetime.now().strftime('%Y%m%d%H%M%S')}{ext}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], save_filename)
         file.save(filepath)
         
         # 提取文本和书名
@@ -200,14 +201,27 @@ def upload_file():
         if not book_title:
             book_title = name
         
-        # 保存到数据库
+        # 检查是否已存在同名书籍
         conn = sqlite3.connect(get_db_path())
         c = conn.cursor()
-        c.execute('''
-            INSERT INTO books (title, filename, content, file_type)
-            VALUES (?, ?, ?, ?)
-        ''', (book_title, filename, content, file_type))
-        book_id = c.lastrowid
+        c.execute('SELECT id FROM books WHERE title = ?', (book_title,))
+        existing = c.fetchone()
+        
+        if existing:
+            # 更新已有书籍
+            book_id = existing[0]
+            c.execute('''
+                UPDATE books SET content = ?, filename = ?, file_type = ?, created_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (content, save_filename, file_type, book_id))
+        else:
+            # 插入新书籍
+            c.execute('''
+                INSERT INTO books (title, filename, content, file_type)
+                VALUES (?, ?, ?, ?)
+            ''', (book_title, save_filename, content, file_type))
+            book_id = c.lastrowid
+        
         conn.commit()
         conn.close()
         
@@ -215,7 +229,8 @@ def upload_file():
             'success': True,
             'book_id': book_id,
             'title': book_title,
-            'content': content
+            'content': content,
+            'updated': existing is not None
         })
     
     return jsonify({'error': '不支持的文件格式'}), 400

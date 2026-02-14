@@ -307,21 +307,31 @@
         .selection-popup {
             position: fixed;
             background: white;
-            border-radius: 6px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            padding: 6px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            padding: 8px;
             display: none;
-            z-index: 1000;
+            z-index: 9999;
+            border: 1px solid var(--border);
         }
 
         .selection-popup button {
-            padding: 8px 12px;
+            padding: 10px 16px;
             background: var(--accent);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
             cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .selection-popup button:hover {
+            background: var(--accent-light);
+        }
+
+        .selection-popup button:active {
+            transform: scale(0.95);
         }
 
         .toast {
@@ -428,17 +438,43 @@
 
     <script>
         let currentBookId = null;
+        let currentBookTitle = '';
         let currentContent = '';
         let highlightedIndices = new Set();
 
-        // 高亮存储
-        function getHighlightKey(id) { return `hl_${id}`; }
-        function loadHighlights(id) {
-            const d = localStorage.getItem(getHighlightKey(id));
-            return d ? new Set(JSON.parse(d)) : new Set();
+        // 高亮存储 - 使用书名的哈希作为 key
+        function getHighlightKey(title) {
+            // 移除特殊字符，确保 key 有效
+            const safeTitle = (title || '').replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+            return `highlight_${safeTitle}`;
         }
-        function saveHighlights(id, set) {
-            localStorage.setItem(getHighlightKey(id), JSON.stringify([...set]));
+
+        function loadHighlights(title) {
+            if (!title) return new Set();
+            try {
+                const key = getHighlightKey(title);
+                const d = localStorage.getItem(key);
+                console.log('[高亮] 加载:', key, '数据:', d ? `${JSON.parse(d).length}个` : '无');
+                return d ? new Set(JSON.parse(d)) : new Set();
+            } catch (e) {
+                console.error('[高亮] 加载失败:', e);
+                return new Set();
+            }
+        }
+
+        function saveHighlights(title, set) {
+            if (!title) {
+                console.warn('[高亮] 书名为空，无法保存');
+                return;
+            }
+            try {
+                const key = getHighlightKey(title);
+                const arr = [...set];
+                localStorage.setItem(key, JSON.stringify(arr));
+                console.log('[高亮] 保存:', key, '数量:', arr.length);
+            } catch (e) {
+                console.error('[高亮] 保存失败:', e);
+            }
         }
 
         // 初始化
@@ -491,8 +527,13 @@
                 }
 
                 currentBookId = id;
+                currentBookTitle = book.title;
                 currentContent = book.content || '';
-                highlightedIndices = loadHighlights(id);
+
+                // 加载高亮
+                highlightedIndices = loadHighlights(book.title);
+                console.log('[加载书籍]', book.title, '高亮数量:', highlightedIndices.size);
+
                 localStorage.setItem('currentBookId', id);
 
                 document.getElementById('book-title').textContent = book.title;
@@ -502,7 +543,7 @@
                 const tc = document.getElementById('text-content');
                 tc.style.display = 'block';
 
-                // 分段渲染，每段最多1000字，分批处理
+                // 渲染内容
                 renderContent(currentContent);
 
                 if (restore) {
@@ -517,6 +558,7 @@
                 loadBooks();
                 showToast('加载成功');
             } catch (e) {
+                console.error('加载失败:', e);
                 showToast('加载失败');
             }
         }
@@ -526,14 +568,17 @@
             const tc = document.getElementById('text-content');
             tc.innerHTML = '';
 
+            console.log('[渲染] 高亮数量:', highlightedIndices.size);
+            if (highlightedIndices.size > 0) {
+                console.log('[渲染] 高亮索引示例:', [...highlightedIndices].slice(0, 5));
+            }
+
             // 按段落分割
             const paragraphs = content.split(/\n\n+/);
-            const maxCharsPerBatch = 5000; // 每批最多处理的字符
             let totalIndex = 0;
-            let currentBatch = '';
-            let batchCount = 0;
+            let htmlContent = '';
 
-            paragraphs.forEach((para, pIdx) => {
+            paragraphs.forEach((para) => {
                 if (!para.trim()) return;
 
                 let paraHtml = '<div class="paragraph">';
@@ -546,7 +591,6 @@
                     } else if (char === ' ') {
                         paraHtml += ' ';
                     } else if (/[，。！？、；：""''（）【】《》\s]/.test(char)) {
-                        // 标点符号不可点击
                         paraHtml += char;
                     } else {
                         const hl = highlightedIndices.has(idx) ? ' highlighted' : '';
@@ -554,27 +598,15 @@
                     }
                 }
                 paraHtml += '</div>';
-                currentBatch += paraHtml;
-
-                // 每累积一定量就添加到 DOM
-                if (currentBatch.length > maxCharsPerBatch) {
-                    const div = document.createElement('div');
-                    div.innerHTML = currentBatch;
-                    while (div.firstChild) tc.appendChild(div.firstChild);
-                    currentBatch = '';
-                    batchCount++;
-                }
+                htmlContent += paraHtml;
             });
 
-            // 添加剩余内容
-            if (currentBatch) {
-                const div = document.createElement('div');
-                div.innerHTML = currentBatch;
-                while (div.firstChild) tc.appendChild(div.firstChild);
-            }
+            tc.innerHTML = htmlContent;
 
-            // 添加点击事件（事件委托）
+            // 添加点击事件
             tc.onclick = handleClick;
+
+            console.log('[渲染] 完成，总字符索引:', totalIndex);
         }
 
         // 处理点击
@@ -593,7 +625,7 @@
             if (target.classList.contains('highlighted')) {
                 target.classList.remove('highlighted');
                 highlightedIndices.delete(idx);
-                saveHighlights(currentBookId, highlightedIndices);
+                saveHighlights(currentBookTitle, highlightedIndices);
                 showToast('已取消高亮');
                 return;
             }
@@ -602,7 +634,7 @@
             document.querySelectorAll('.char.active').forEach(el => el.classList.remove('active'));
             target.classList.add('active', 'highlighted');
             highlightedIndices.add(idx);
-            saveHighlights(currentBookId, highlightedIndices);
+            saveHighlights(currentBookTitle, highlightedIndices);
 
             // 获取上下文
             const chars = document.querySelectorAll('.char');
@@ -619,11 +651,19 @@
         // 删除书籍
         async function deleteBook(id) {
             if (!confirm('确定删除？')) return;
+
+            // 先获取书名用于删除高亮
+            const res = await fetch(`/api/book/${id}`);
+            const book = await res.json();
+            const title = book.title;
+
             await fetch(`/api/book/${id}`, { method: 'DELETE' });
             localStorage.removeItem(`scroll_${id}`);
-            localStorage.removeItem(getHighlightKey(id));
+            if (title) localStorage.removeItem(getHighlightKey(title));
+
             if (currentBookId === id) {
                 currentBookId = null;
+                currentBookTitle = '';
                 currentContent = '';
                 highlightedIndices.clear();
                 localStorage.removeItem('currentBookId');
@@ -675,27 +715,63 @@
         // 文本选择
         function setupSelection() {
             const popup = document.getElementById('popup');
-            const tc = document.getElementById('text-content');
 
-            document.addEventListener('mouseup', () => {
+            document.addEventListener('mouseup', (e) => {
                 setTimeout(() => {
                     const sel = window.getSelection();
                     const text = sel.toString().trim();
+                    const tc = document.getElementById('text-content');
 
-                    if (text.length > 1 && tc.contains(sel.anchorNode)) {
-                        const range = sel.getRangeAt(0);
-                        const rect = range.getBoundingClientRect();
-                        popup.style.left = Math.min(rect.left + rect.width / 2 - 40, window.innerWidth - 100) + 'px';
-                        popup.style.top = (rect.top - 40) + 'px';
-                        popup.style.display = 'block';
+                    console.log('[选择] 选中文字:', text.length, '字');
+
+                    // 选中超过1个字符
+                    if (text.length > 1 && tc) {
+                        // 检查选中的文字是否在阅读区域内
+                        let isInTextContent = false;
+                        if (sel.anchorNode) {
+                            let node = sel.anchorNode;
+                            while (node) {
+                                if (node === tc || node.id === 'text-content') {
+                                    isInTextContent = true;
+                                    break;
+                                }
+                                node = node.parentNode;
+                            }
+                        }
+
+                        console.log('[选择] 在文本区域内:', isInTextContent);
+
+                        if (isInTextContent) {
+                            try {
+                                const range = sel.getRangeAt(0);
+                                const rect = range.getBoundingClientRect();
+
+                                let left = rect.left + rect.width / 2 - 50;
+                                left = Math.max(10, Math.min(left, window.innerWidth - 120));
+                                let top = rect.top - 50;
+                                if (top < 10) top = rect.bottom + 10;
+
+                                popup.style.left = left + 'px';
+                                popup.style.top = top + 'px';
+                                popup.style.display = 'block';
+                                console.log('[选择] 显示弹窗');
+                            } catch (err) {
+                                console.error('[选择] 错误:', err);
+                                popup.style.display = 'none';
+                            }
+                        } else {
+                            popup.style.display = 'none';
+                        }
                     } else {
                         popup.style.display = 'none';
                     }
-                }, 10);
+                }, 100);
             });
 
             document.addEventListener('mousedown', e => {
-                if (!popup.contains(e.target)) popup.style.display = 'none';
+                if (!popup.contains(e.target)) {
+                    popup.style.display = 'none';
+                }
             });
         }
 
@@ -717,7 +793,7 @@
                     if (!isNaN(idx)) highlightedIndices.add(idx);
                 }
             });
-            saveHighlights(currentBookId, highlightedIndices);
+            saveHighlights(currentBookTitle, highlightedIndices);
 
             const isWord = text.length <= 4 && !/[，。！？、；：]/.test(text);
 
